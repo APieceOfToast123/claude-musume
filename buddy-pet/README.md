@@ -36,7 +36,7 @@
 | 点对话气泡 | 正在逐字显示时先显示整句，再点一下收起 |
 | 右键 | 菜单，见下 |
 
-右键菜单的第一层是常用操作：隐藏或显示、立即刷新、管理台词、鼠标穿透、置顶、回到右下角、退出。其余开关收在“设置”里：大小、额度卡片的样式、闲聊频率、提示音（开关、音量、任务结束音、试听、自定义声音文件夹）、任务完成提醒、没人理时打瞌睡、感知 Claude Code 工作状态、跟随 Claude 启动和退出，以及 Claude Code 插件的安装状态。托盘图标的右键菜单和这里一样，单击托盘图标她会报一下额度。
+右键菜单的第一层是常用操作：隐藏或显示、立即刷新、管理台词、鼠标穿透、置顶、回到右下角、退出。其余开关收在“设置”里：大小、额度卡片的样式、闲聊频率、提示音（开关、音量、任务结束音、试听、自定义声音文件夹）、任务完成提醒、没人理时打瞌睡、感知 Claude Code 工作状态、跟随 Claude 启动和退出、开机自动启动，以及 Claude Code 插件的安装状态。托盘图标的右键菜单和这里一样，单击托盘图标她会报一下额度。
 
 ## 额度卡片
 
@@ -151,8 +151,9 @@
 | `claude-plugin\` | 随附的 Claude Code 插件，菜单里安装时从这里复制 |
 | `启动桌宠.bat` | 手动启动 |
 | `follow_claude.pyw` | 常驻小哨兵，Claude 打开时叫她出来 |
-| `claude_app.py` | 判断 Claude 桌面端开没开、是不是在前台 |
+| `claude_app.py` | 判断 Claude 桌面端开没开、是不是在前台，Shift 点她时把它叫到前台 |
 | `desktop_win.py` | 保持置顶、判断全屏、鼠标穿透 |
+| `autostart.py` | 开机自动启动的注册表登记 |
 | `snapshot.py` | 自检：把各种状态渲染成 PNG，由 `python pet.pyw --snapshot 目录` 调用 |
 | `line_tags.py` | 闲聊区台词的【条件】规则 |
 | `lines.json` | 你的台词，首次运行时生成，不进源码仓库 |
@@ -180,6 +181,10 @@ Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Na
 ```powershell
 Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'ClaudeBuddyPet'
 ```
+
+### 开机自动启动
+
+想一登录 Windows 就让她出来（不等 Claude 打开），勾选“设置 › 开机自动启动”。它在同一个 Run 键下登记另一项 `ClaudeBuddyPetAutostart`，直接启动桌宠：安装版是 `Claude娘.exe`，源码版是当前这个 pythonw 加 `pet.pyw`，所以挪了文件夹要重新勾一次。和哨兵互不影响，两项都开着也只会有一只。在任务管理器的“启动应用”里禁用它，菜单里也会显示为没勾；再勾上会解除禁用。取消勾选就删掉这一项，卸载安装版时也会删掉。
 
 ## 打包
 

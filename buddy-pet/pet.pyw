@@ -53,6 +53,7 @@ from PyQt5.QtGui import (
 )
 from PyQt5.QtWidgets import QActionGroup, QApplication, QFileDialog, QMenu, QMessageBox, QSystemTrayIcon, QToolTip, QWidget
 
+import autostart
 import desktop_win
 import line_tags
 import sounds
@@ -1668,6 +1669,12 @@ class Pet(QWidget, EdgeDock):
         self.add_toggle(settings, "sleep", "没人理时打瞌睡")
         self.add_toggle(settings, "watch", "感知 Claude Code 工作状态")
         self.add_toggle(settings, "follow", "跟随 Claude 启动和退出")
+        if autostart.available():
+            # 开没开以注册表为准，不存在 config.json 里：在任务管理器里改过也能对上。
+            act = settings.addAction("开机自动启动")
+            act.setCheckable(True)
+            act.setChecked(autostart.enabled())
+            act.toggled.connect(self.set_autostart)
         settings.addSeparator()
         self.add_plugin_menu(settings)
         menu.addSeparator()
@@ -1709,6 +1716,14 @@ class Pet(QWidget, EdgeDock):
             sub.addAction("安装" if state == "missing" else "更新", self.install_plugin_clicked)
         if PLUGIN_DST.is_dir():
             sub.addAction("打开安装位置", lambda: self.open_folder(PLUGIN_DST, create=False))
+
+    def set_autostart(self, on: bool) -> None:
+        try:
+            autostart.set_enabled(on, Path(__file__).resolve())
+        except OSError as err:
+            self.say(f"开机启动没设置成功：{err}", 9.0)
+            return
+        self.say("好，以后开机我就出来" if on else "好，开机时我不自己出来了")
 
     def install_plugin_clicked(self) -> None:
         message = install_plugin()
