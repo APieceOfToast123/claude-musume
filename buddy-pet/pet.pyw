@@ -12,7 +12,7 @@ Claude Code 插件 claude-buddy-bridge 写的会话文件。装了插件，重�
 置顶：Windows 偶尔会把置顶窗口排到普通窗口下面，她每 1.5 秒检查一次，被压住就回到最上层；前台有全屏程序时先躲起来。
 鼠标穿透：打开后点击直接落到她下面的窗口，按住 Ctrl 时才能点她、拖她、右键她。
 
-操作：左键点她互动，按住拖动换位置，鼠标停在额度卡片上看文字详情，右键打开菜单（台词在“管理台词”里改）。
+操作：左键点她互动，Shift 加左键叫出 Claude 桌面端，按住拖动换位置，鼠标停在额度卡片上看文字详情，右键打开菜单（台词在“管理台词”里改）。
 运行：pythonw pet.pyw    已经有一只在运行时，新的直接退出
 自检：python pet.pyw --snapshot 目录    把几种状态渲染成 PNG 后退出，不显示窗口
 打包：python build.py    生成 dist\\Claude娘 和安装程序，见 README
@@ -58,7 +58,7 @@ import line_tags
 import sounds
 from art import Art
 from bubble import BARS, BORDER, FAINT, LABEL, SEP, TONES, WINDOW_FLAGS, Bubble, draw_bar, font, soft_shadow
-from claude_app import claude_foreground, claude_open
+from claude_app import claude_foreground, claude_open, show_claude
 from edge_dock import EdgeDock
 from snapshot import snapshot
 from usage_data import (
@@ -1855,7 +1855,10 @@ class Pet(QWidget, EdgeDock):
             if random.random() < 0.3:
                 self.say_kind("drop")
         elif self.on_body(e.pos()):
-            self.poke(now)
+            if e.modifiers() & Qt.ShiftModifier:
+                self.call_claude(now)
+            else:
+                self.poke(now)
         else:
             self.motion.release(now)
             if self.on_card(e.pos()) and self.cfg["card"] != "detail":
@@ -1885,6 +1888,13 @@ class Pet(QWidget, EdgeDock):
             self.say_kind("usage")
         else:
             self.say_kind("click")
+
+    def call_claude(self, now: float) -> None:
+        """Shift 加左键点她：把 Claude 桌面端叫到前台，没开就打开它。"""
+        self.touch()
+        self.motion.release(now)
+        if not show_claude():
+            self.say("没找到 Claude 桌面端，装好了吗？")
 
     def event(self, e) -> bool:
         if e.type() == QEvent.ToolTip:
